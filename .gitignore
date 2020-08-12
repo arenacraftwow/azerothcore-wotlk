@@ -3,7 +3,7 @@
 #
 
 conf/*
-!conf/*.dist
+!conf/dist
 apps/drassil/*
 env/dist/*
 env/user/*
@@ -88,4 +88,3 @@ local.properties
 #  !modules/yourmodule
 #
 # ==================
-
