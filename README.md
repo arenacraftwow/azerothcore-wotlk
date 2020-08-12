@@ -1,7 +1,7 @@
 # ![logo](https://raw.githubusercontent.com/azerothcore/azerothcore.github.io/master/images/logo-github.png) AzerothCore
 
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/e61f4ea81de14b289fbf83d2b0da0c35)](https://app.codacy.com/app/FrancescoBorzi/azerothcore-wotlk?utm_source=github.com&utm_medium=referral&utm_content=azerothcore/azerothcore-wotlk&utm_campaign=Badge_Grade_Settings)
-[![Master Build Status](https://travis-ci.org/azerothcore/azerothcore-wotlk.svg)](https://travis-ci.org/azerothcore/azerothcore-wotlk)
+[![core-build](https://github.com/azerothcore/azerothcore-wotlk/workflows/core-build/badge.svg?branch=master&event=push)](https://github.com/azerothcore/azerothcore-wotlk/actions?query=workflow%3Acore-build+branch%3Amaster+event%3Apush)
 <a href="https://scan.coverity.com/projects/azerothcore-azerothcore-wotlk">
   <img alt="Coverity Scan Build Status"  src="https://scan.coverity.com/projects/13814/badge.svg"/>
 </a>
@@ -150,7 +150,7 @@ This project exists thanks to:
 ## IMPORTANT LINKS
 
 - [Website](http://www.azerothcore.org/)
-- [AzerothCore catalogue](http://www.azerothcore.org/modules-catalogue/  "Modules, tools, and other things for AzerothCore") (modules, tools etc...)
+- [AzerothCore catalogue](http://www.azerothcore.org/catalogue/  "Modules, tools, and other things for AzerothCore") (modules, tools etc...)
 - [Module template / Module skeleton](https://github.com/azerothcore/skeleton-module/)
 - [Our community hub (Discord)](https://discord.gg/gkt4y2x)
 - [Our wiki](http://www.azerothcore.org/wiki "Easy to use and developed by AzerothCore founder")

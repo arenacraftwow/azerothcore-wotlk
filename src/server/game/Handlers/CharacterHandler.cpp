@@ -1199,8 +1199,9 @@ void WorldSession::HandlePlayerLoginFromDB(LoginQueryHolder* holder)
     }
 
     sScriptMgr->OnPlayerLogin(pCurrChar);
-    
-    if (pCurrChar->HasAtLoginFlag(AT_LOGIN_FIRST)) {
+
+    if (pCurrChar->HasAtLoginFlag(AT_LOGIN_FIRST)) 
+    {
         pCurrChar->RemoveAtLoginFlag(AT_LOGIN_FIRST);
         sScriptMgr->OnFirstLogin(pCurrChar);
     }

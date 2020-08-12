@@ -1015,7 +1015,7 @@ void Player::CleanupsBeforeDelete(bool finalCleanup)
     Unit::CleanupsBeforeDelete(finalCleanup);
 }
 
-bool Player::Create(uint32 guidlow, CharacterCreateInfo *createInfo)
+bool Player::Create(uint32 guidlow, CharacterCreateInfo* createInfo)
 {
     //FIXME: outfitId not used in player creating
     // TODO: need more checks against packet modifications
@@ -16383,7 +16383,7 @@ bool Player::SatisfyQuestStatus(Quest const *qInfo, bool msg) const
 
 bool Player::SatisfyQuestConditions(Quest const *qInfo, bool msg)
 {
-    ConditionList conditions = sConditionMgr->GetConditionsForNotGroupedEntry(CONDITION_SOURCE_TYPE_QUEST_ACCEPT, qInfo->GetQuestId());
+    ConditionList conditions = sConditionMgr->GetConditionsForNotGroupedEntry(CONDITION_SOURCE_TYPE_QUEST_AVAILABLE, qInfo->GetQuestId());
     if (!sConditionMgr->IsObjectMeetToConditions(this, conditions))
     {
         if (msg)
@@ -16840,7 +16840,7 @@ QuestGiverStatus Player::GetQuestDialogStatus(Object *questgiver)
         if (!quest)
             continue;
 
-        ConditionList conditions = sConditionMgr->GetConditionsForNotGroupedEntry(CONDITION_SOURCE_TYPE_QUEST_SHOW_MARK, quest->GetQuestId());
+        ConditionList conditions = sConditionMgr->GetConditionsForNotGroupedEntry(CONDITION_SOURCE_TYPE_QUEST_AVAILABLE, quest->GetQuestId());
         if (!sConditionMgr->IsObjectMeetToConditions(this, conditions))
             continue;
 
@@ -16868,7 +16868,7 @@ QuestGiverStatus Player::GetQuestDialogStatus(Object *questgiver)
         if (!quest)
             continue;
 
-        ConditionList conditions = sConditionMgr->GetConditionsForNotGroupedEntry(CONDITION_SOURCE_TYPE_QUEST_SHOW_MARK, quest->GetQuestId());
+        ConditionList conditions = sConditionMgr->GetConditionsForNotGroupedEntry(CONDITION_SOURCE_TYPE_QUEST_AVAILABLE, quest->GetQuestId());
         if (!sConditionMgr->IsObjectMeetToConditions(this, conditions))
             continue;
 
@@ -22850,8 +22850,8 @@ void Player::ReportedAfkBy(Player *reporter)
     if (m_bgData.bgAfkReporter.find(reporter->GetGUIDLow()) == m_bgData.bgAfkReporter.end() && !HasAura(43680) && !HasAura(43681) && reporter->CanReportAfkDueToLimit())
     {
         m_bgData.bgAfkReporter.insert(reporter->GetGUIDLow());
-        // 3 players have to complain to apply debuff
-        if (m_bgData.bgAfkReporter.size() >= 3)
+        // by default 3 players have to complain to apply debuff
+        if (m_bgData.bgAfkReporter.size() >= sWorld->getIntConfig(CONFIG_BATTLEGROUND_REPORT_AFK))
         {
             // cast 'Idle' spell
             CastSpell(this, 43680, true);
@@ -27022,18 +27022,6 @@ uint8 Player::GetMostPointsTalentTree() const
     return maxIndex;
 }
 
-bool Player::IsHealerTalentSpec() const
-{
-    uint8 tree = GetMostPointsTalentTree();
-    return ((getClass() == CLASS_DRUID && tree == 2) || (getClass() == CLASS_PALADIN && tree == 0) || (getClass() == CLASS_PRIEST && tree <= 1) || (getClass() == CLASS_SHAMAN && tree == 2));
-}
-
-bool Player::IsTankTalentSpec() const
-{
-    uint8 tree = GetMostPointsTalentTree();
-    return ((getClass() == CLASS_PALADIN && tree == 1) || (getClass() == CLASS_WARRIOR && tree == 2) || (getClass() == CLASS_DRUID && tree == 1) || (getClass() == CLASS_DEATH_KNIGHT && tree == 1));
-}
-
 void Player::ResetTimeSync()
 {
     m_timeSyncCounter = 0;
@@ -27683,6 +27671,143 @@ bool Player::IsPetDismissed()
     if (PreparedQueryResult result = CharacterDatabase.AsyncQuery(stmt))
         return true;
 
+    return false;
+}
+
+uint32 Player::GetSpec(int8 spec)
+{
+    uint32 mostTalentTabId = 0;
+    uint32 mostTalentCount = 0;
+    uint32 specIdx = 0;
+
+    if (m_specsCount) // not all instances of Player have a spec for some reason
+    {
+        if (spec < 0)
+            specIdx = m_activeSpec;
+        else
+            specIdx = spec;
+        // find class talent tabs (all players have 3 talent tabs)
+        uint32 const* talentTabIds = GetTalentTabPages(getClass());
+
+        for (uint8 i = 0; i < MAX_TALENT_TABS; ++i)
+        {
+            uint32 talentCount = 0;
+            uint32 talentTabId = talentTabIds[i];
+            for (uint32 talentId = 0; talentId < sTalentStore.GetNumRows(); ++talentId)
+            {
+                TalentEntry const* talentInfo = sTalentStore.LookupEntry(talentId);
+                if (!talentInfo)
+                    continue;
+
+                // skip another tab talents
+                if (talentInfo->TalentTab != talentTabId)
+                    continue;
+
+                // find max talent rank (0~4)
+                int8 curtalent_maxrank = -1;
+                for (int8 rank = MAX_TALENT_RANK - 1; rank >= 0; --rank)
+                {
+                    if (talentInfo->RankID[rank] && HasTalent(talentInfo->RankID[rank], specIdx))
+                    {
+                        curtalent_maxrank = rank;
+                        break;
+                    }
+                }
+
+                // not learned talent
+                if (curtalent_maxrank < 0)
+                    continue;
+
+                talentCount += curtalent_maxrank + 1;
+            }
+
+            if (mostTalentCount < talentCount)
+            {
+                mostTalentCount = talentCount;
+                mostTalentTabId = talentTabId;
+            }
+        }
+    }
+    return mostTalentTabId;
+}
+
+bool Player::HasTankSpec()
+{
+    switch (GetSpec())
+    {
+        case TALENT_TREE_WARRIOR_PROTECTION:
+        case TALENT_TREE_PALADIN_PROTECTION:
+        case TALENT_TREE_DEATH_KNIGHT_BLOOD:
+            return true;
+        case TALENT_TREE_DRUID_FERAL_COMBAT:
+            if (GetShapeshiftForm() == FORM_BEAR || GetShapeshiftForm() == FORM_DIREBEAR)
+                return true;
+            break;
+        default:
+            break;
+    }
+    return false;
+}
+
+bool Player::HasMeleeSpec()
+{
+    switch (GetSpec(GetActiveSpec()))
+    {
+        case TALENT_TREE_WARRIOR_ARMS:
+        case TALENT_TREE_WARRIOR_FURY:
+        case TALENT_TREE_PALADIN_RETRIBUTION:
+        case TALENT_TREE_ROGUE_ASSASSINATION:
+        case TALENT_TREE_ROGUE_COMBAT:
+        case TALENT_TREE_ROGUE_SUBTLETY:
+        case TALENT_TREE_DEATH_KNIGHT_FROST:
+        case TALENT_TREE_DEATH_KNIGHT_UNHOLY:
+        case TALENT_TREE_SHAMAN_ENHANCEMENT:
+            return true;
+        case TALENT_TREE_DRUID_FERAL_COMBAT:
+            if (GetShapeshiftForm() == FORM_CAT)
+                return true;
+        default:
+            break;
+    }
+    return false;
+}
+
+bool Player::HasCasterSpec()
+{
+    switch (GetSpec(GetActiveSpec()))
+    {
+        case TALENT_TREE_PRIEST_SHADOW:
+        case TALENT_TREE_SHAMAN_ELEMENTAL:
+        case TALENT_TREE_MAGE_ARCANE:
+        case TALENT_TREE_MAGE_FIRE:
+        case TALENT_TREE_MAGE_FROST:
+        case TALENT_TREE_WARLOCK_AFFLICTION:
+        case TALENT_TREE_WARLOCK_DEMONOLOGY:
+        case TALENT_TREE_WARLOCK_DESTRUCTION:
+        case TALENT_TREE_DRUID_BALANCE:
+        case TALENT_TREE_HUNTER_BEAST_MASTERY:
+        case TALENT_TREE_HUNTER_MARKSMANSHIP:
+        case TALENT_TREE_HUNTER_SURVIVAL:
+            return true;
+        default:
+            break;
+    }
+    return false;
+}
+
+bool Player::HasHealSpec()
+{
+    switch (GetSpec(GetActiveSpec()))
+    {
+        case TALENT_TREE_PALADIN_HOLY:
+        case TALENT_TREE_PRIEST_DISCIPLINE:
+        case TALENT_TREE_PRIEST_HOLY:
+        case TALENT_TREE_SHAMAN_RESTORATION:
+        case TALENT_TREE_DRUID_RESTORATION:
+            return true;
+        default:
+            break;
+    }
     return false;
 }
 
