@@ -20,5 +20,9 @@
         "mysql2": "^2.1.0",
         "querystring": "^0.2.0",
         "validate": "^5.1.0"
-    }
+    },
+    "pkg": {
+        "assets": "./build/**/*"
+    },
+    "bin": "./server.js"
 }
