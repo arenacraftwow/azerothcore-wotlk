@@ -114,6 +114,24 @@ export function CreateAccountPage() {
                     >COPY</Button>
                 </div>
             </Alert>
+            <Alert type='info' hideAlertType>
+                <div style={{ display: 'flex', flexFlow: 'row nowrap', justifyContent: 'space-between' }}>
+                    <div style={{ display: 'flex', flexFlow: 'row nowrap', alignItems: 'center' }}>
+                        <div style={{ display: 'flex', flexFlow: 'row wrap', marginRight: 8 }}>
+                            <img src={require('./octet-stream.png')} alt="Download Icon" />
+                        </div>
+                        <span>Patch-A.MPQ <i style={{fontSize: '0.85em', color: 'rgba(255, 255, 255, 0.7)'}}>(~200 MB)</i></span>
+                    </div>
+                    <Button
+                        dense={true}
+                        buttonProps={{
+                            onClick() {
+                                window.open('https://drive.google.com/file/d/1935XKpO3MQ2yXutRSB_B3k-qndxgV6Os/view?usp=sharing', '_blank');
+                            }
+                        }}
+                    >DOWNLOAD</Button>
+                </div>
+            </Alert>
             <form onSubmit={submitHandler}>
                 <Header>Registration</Header>
                 <TextField

@@ -6,6 +6,11 @@ import { Root } from './components/Root/Root';
 import {
     BrowserRouter as Router,
 } from "react-router-dom";
+import reactga from 'react-ga';
+
+if (process.env.NODE_ENV === 'production') {
+    reactga.initialize('UA-175597116-1');
+}
 
 ReactDOM.render((
     <Router>
