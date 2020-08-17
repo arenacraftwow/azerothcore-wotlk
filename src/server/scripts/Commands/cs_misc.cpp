@@ -163,6 +163,12 @@ public:
                 allowedArenas.insert(BATTLEGROUND_DS);
             else if (tmpStr == "RV")
                 allowedArenas.insert(BATTLEGROUND_RV);
+            else if (tmpStr == "TV")
+                allowedArenas.insert(BattlegroundTypeId(870));
+            else if (tmpStr == "TP")
+                allowedArenas.insert(BattlegroundTypeId(871));
+            else if (tmpStr == "AF")
+                allowedArenas.insert(BattlegroundTypeId(873));
             else
             {
                 handler->PSendSysMessage("Invalid [arena] specified.");

@@ -9509,9 +9509,9 @@ void Player::SendInitWorldStates(uint32 zoneid, uint32 areaid)
         data << uint32(0x9bb) << uint32(0xF); // 9
     }
 
-    if (Player::bgZoneIdToFillWorldStates.find(zoneid) != Player::bgZoneIdToFillWorldStates.end())
+    if (Player::bgMapIdToFillInitialWorldStatesCallback.find(mapid) != Player::bgMapIdToFillInitialWorldStatesCallback.end())
     {
-        Player::bgZoneIdToFillWorldStates[zoneid](bg, data);
+        Player::bgMapIdToFillInitialWorldStatesCallback[mapid](bg, data);
     }
     else
     {
@@ -27811,4 +27811,4 @@ bool Player::HasHealSpec()
     return false;
 }
 
-std::unordered_map<int, bgZoneRef> Player::bgZoneIdToFillWorldStates = {};
+std::unordered_map<int, bgZoneRef> Player::bgMapIdToFillInitialWorldStatesCallback = {};

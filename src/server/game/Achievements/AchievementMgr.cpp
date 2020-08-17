@@ -2369,8 +2369,6 @@ bool AchievementGlobalMgr::isStatisticAchievement(AchievementEntry const* achiev
         switch(cat->ID) {
             case ACHIEVEMENT_CATEGORY_STATISTICS:
                 return true;
-            case ACHIEVEMENT_CATEOGRY_GENERAL:
-                return false;
             default:
                 cat = sAchievementCategoryStore.LookupEntry(cat->parentCategory);
                 break;

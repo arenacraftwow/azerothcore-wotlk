@@ -17,7 +17,8 @@ char const* MPQManager::Files[] = {
     "lichking.MPQ",
     "patch.MPQ",
     "patch-2.MPQ",
-    "patch-3.MPQ"
+    "patch-3.MPQ",
+    "patch-5.MPQ",
 };
 
 char const* MPQManager::Languages[] = { "enGB", "enUS", "deDE", "esES", "frFR", "koKR", "zhCN", "zhTW", "enCN", "enTW", "esMX", "ruRU" };

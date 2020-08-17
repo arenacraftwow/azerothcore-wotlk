@@ -890,6 +890,19 @@ namespace MMAP
     /**************************************************************************/
     bool MapBuilder::shouldSkipMap(uint32 mapID)
     {
+        switch (mapID)
+        {
+        case 559:
+        case 562:
+        case 617:
+        case 618:
+        case 980:
+        case 1134:
+        case 1135:
+            return false;
+        default:
+            return true;
+        }
         if (m_skipContinents)
             switch (mapID)
             {
@@ -1003,7 +1016,7 @@ namespace MMAP
 
         return true;
     }
-    
+
     /**************************************************************************/
     uint32 MapBuilder::percentageDone(uint32 totalTiles, uint32 totalTilesBuilt)
     {

@@ -52,18 +52,20 @@ MPQFile::MPQFile(const char* filename):
     pointer(0),
     size(0)
 {
-    for(ArchiveSet::iterator i=gOpenArchives.begin(); i!=gOpenArchives.end();++i)
+    for(auto arch =gOpenArchives.begin(); arch !=gOpenArchives.end();++arch)
     {
-        mpq_archive *mpq_a = (*i)->mpq_a;
+        mpq_archive *mpq_a = (*arch)->mpq_a;
 
         uint32_t filenum;
-        if(libmpq__file_number(mpq_a, filename, &filenum)) continue;
+        if(libmpq__file_number(mpq_a, filename, &filenum)) {
+            continue;
+        }
         libmpq__off_t transferred;
         libmpq__file_unpacked_size(mpq_a, filenum, &size);
 
         // HACK: in patch.mpq some files don't want to open and give 1 for filesize
         if (size<=1) {
-//            printf("warning: file %s has size %d; cannot read.\n", filename, size);
+            printf("warning: file %s has size %d; cannot read.\n", filename, size);
             eof = true;
             buffer = 0;
             return;
