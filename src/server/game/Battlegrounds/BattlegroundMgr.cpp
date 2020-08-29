@@ -957,7 +957,7 @@ bool BattlegroundMgr::IsBGWeekend(BattlegroundTypeId bgTypeId)
 BattlegroundTypeId BattlegroundMgr::GetRandomBG(BattlegroundTypeId bgTypeId)
 {
 
-    if (bgTypeId == BATTLEGROUND_AA) // fuck that DB shit
+    if (bgTypeId == BATTLEGROUND_AA) // random arena request
     {
         static std::set<BattlegroundTypeId> type_ids = {
             BATTLEGROUND_RV,         //
@@ -983,7 +983,7 @@ BattlegroundTypeId BattlegroundMgr::GetRandomBG(BattlegroundTypeId bgTypeId)
         return acore::Containers::SelectRandomWeightedContainerElement(type_ids, weights);
     }
 
-    else
+    else if (bgTypeId == BATTLEGROUND_RB) // random bg request
     {
         if (CreateBattlegroundData const* bgTemplate = GetBattlegroundTemplateByTypeId(bgTypeId))
         {
@@ -1009,6 +1009,11 @@ BattlegroundTypeId BattlegroundMgr::GetRandomBG(BattlegroundTypeId bgTypeId)
         }
 
         return BATTLEGROUND_TYPE_NONE;
+    }
+    else
+    {
+        // direct request.
+        return bgTypeId;
     }
 }
 

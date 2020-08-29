@@ -296,13 +296,6 @@ public:
             return false;
         }
 
-        Battleground* bgt = sBattlegroundMgr->GetBattlegroundTemplate(BATTLEGROUND_AA);
-        if (!bgt)
-        {
-            handler->PSendSysMessage("Couldn't create arena map!");
-            handler->SetSentErrorMessage(true);
-            return false;
-        }
 
         Battleground* bg = sBattlegroundMgr->CreateNewBattleground(randomizedArenaBgTypeId, 80, 80, ArenaType(hcnt >= 2 ? hcnt : 2), false);
         if (!bg)

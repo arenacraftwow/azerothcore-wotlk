@@ -728,6 +728,9 @@ class Spell
         double rand_norm()                      { return m_caster->GetMap()->mtRand.randExc(); }
         double rand_chance()                    { return m_caster->GetMap()->mtRand.randExc(100.0); }
 #endif
+        bool has_hostile_smoke_bomb(Unit* unit);
+        bool has_friendly_smoke_bomb(Unit* unit);
+        bool smoke_bomb_check();
 };
 
 namespace acore

@@ -31,7 +31,65 @@ enum RogueSpells
     SPELL_ROGUE_SHIV_TRIGGERED                  = 5940,
     SPELL_ROGUE_TRICKS_OF_THE_TRADE_DMG_BOOST   = 57933,
     SPELL_ROGUE_TRICKS_OF_THE_TRADE_PROC        = 59628,
+    SPELL_ROGUE_REDIRECT                        = 90003,
 };
+
+class spell_rog_redirect : public SpellScriptLoader
+{
+  public:
+    spell_rog_redirect() : SpellScriptLoader("spell_rog_redirect") { }
+
+    class spell_rog_redirect_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_rog_redirect_SpellScript);
+
+        SpellCastResult CheckCast()
+        {
+            if (GetCaster())
+            {
+                if (GetCaster()->GetTypeId() != TYPEID_PLAYER)
+                    return SPELL_FAILED_DONT_REPORT;
+
+                if (!GetCaster()->ToPlayer()->GetComboPoints())
+                    return SPELL_FAILED_NO_COMBO_POINTS;
+            }
+            else
+                return SPELL_FAILED_DONT_REPORT;
+
+            return SPELL_CAST_OK;
+        }
+
+        void HandleOnHit()
+        {
+            if (Player* _player = GetCaster()->ToPlayer())
+            {
+                if (Unit* target = GetHitUnit())
+                {
+                    uint8 cp = _player->GetComboPoints();
+
+                    if (cp > 5)
+                        cp = 5;
+
+                    _player->ClearComboPoints();
+                    _player->AddComboPoints(target, cp);
+                }
+            }
+        }
+
+        void Register()
+        {
+            OnCheckCast += SpellCheckCastFn(spell_rog_redirect_SpellScript::CheckCast);
+            OnHit += SpellHitFn(spell_rog_redirect_SpellScript::HandleOnHit);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_rog_redirect_SpellScript();
+    }
+};
+
+
 
 // Ours
 class spell_rog_savage_combat : public SpellScriptLoader
@@ -818,4 +876,6 @@ void AddSC_rogue_spell_scripts()
     new spell_rog_shiv();
     new spell_rog_tricks_of_the_trade();
     new spell_rog_tricks_of_the_trade_proc();
+
+    new spell_rog_redirect();
 }

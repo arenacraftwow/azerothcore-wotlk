@@ -7,4 +7,21 @@ if [ -z "$1" ]; then
   exit -1;
 fi;
 
-rsync -rzvhP ~/dev/wow_server $1:~
+
+echo "COMPILING..."
+cd build
+cmake ../ \
+  -DCMAKE_BUILD_TYPE=RELEASE \
+	-DCMAKE_INSTALL_PREFIX=/opt/wow_server \
+	-DCONF_DIR=/opt/wow_server \
+	-DTOOLS=1 \
+	/
+make -j $(nproc) install
+cd ..
+echo "DONE COMPILING"
+
+sleep 3
+
+echo "UPLOADING..."
+rsync -rzvhP /opt/wow_server $1:/opt
+echo "DONE UPLOADING"
