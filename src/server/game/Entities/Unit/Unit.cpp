@@ -16787,7 +16787,7 @@ void Unit::SetStunned(bool apply)
         }
 
         // xinef: inform client about our current orientation
-        SendMovementFlagUpdate();
+        SendMovementFlagUpdate(true);
 
         // Creature specific
         if (GetTypeId() != TYPEID_PLAYER)
