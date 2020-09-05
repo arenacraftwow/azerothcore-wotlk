@@ -34,7 +34,8 @@ enum PriestSpells
     SPELL_PRIEST_SHADOW_WORD_DEATH                  = 32409,
     SPELL_PRIEST_T9_HEALING_2P                      = 67201,
     SPELL_PRIEST_VAMPIRIC_TOUCH_DISPEL              = 64085,
-
+    SPELL_PRIEST_GRIP_ABILITY                       = 90007,
+    SPELL_PRIEST_GRIP_ABILITY_HOOK                  = 90010,
     SPELL_GENERIC_ARENA_DAMPENING                   = 74410,
     SPELL_GENERIC_BATTLEGROUND_DAMPENING            = 74411
 };
@@ -132,6 +133,60 @@ class spell_pri_shadowfiend_scaling : public SpellScriptLoader
         {
             return new spell_pri_shadowfiend_scaling_AuraScript();
         }
+};
+
+// based on dk's grip
+// id = 90007
+class spell_priest_grip : public SpellScriptLoader
+{
+  public:
+    spell_priest_grip() : SpellScriptLoader("spell_priest_grip") { }
+
+    class spell_priest_grip_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_priest_grip_SpellScript);
+
+        SpellCastResult CheckCast()
+        {
+            Unit* caster = GetCaster();
+            Unit* target = GetExplTargetUnit();
+
+            if (target->GetTypeId() == TYPEID_PLAYER && caster->GetExactDist(target) < 8.0f) // xinef: should be 8.0f, but we have to add target size (1.5f)
+                return SPELL_FAILED_TOO_CLOSE;
+
+            return SPELL_CAST_OK;
+        }
+
+        void HandleDummy(SpellEffIndex /*effIndex*/)
+        {
+            float casterZ = GetCaster()->GetPositionZ(); // for Ring of Valor
+            WorldLocation gripPos = *GetExplTargetDest();
+            if (Unit* target = GetHitUnit())
+                if (!target->HasAuraType(SPELL_AURA_DEFLECT_SPELLS) || target->HasUnitState(UNIT_STATE_STUNNED)) // Deterrence
+                {
+                    const SpellInfo* spellInfo = sSpellMgr->GetSpellInfo(1766); // Rogue kick
+                    if (!target->IsImmunedToSpellEffect(spellInfo, EFFECT_0))
+                        target->InterruptNonMeleeSpells(false, 0, false);
+
+                    if (target->GetMapId() == 618) // for Ring of Valor
+                        gripPos.m_positionZ = std::max(casterZ+0.2f, 28.5f);
+
+                    target->CastSpell(gripPos.GetPositionX(), gripPos.GetPositionY(), gripPos.GetPositionZ(), 57604, true);
+                    target->CastSpell(target, PriestSpells::SPELL_PRIEST_GRIP_ABILITY_HOOK,true);
+                }
+        }
+
+        void Register()
+        {
+            OnCheckCast += SpellCheckCastFn(spell_priest_grip_SpellScript::CheckCast);
+            OnEffectHitTarget += SpellEffectFn(spell_priest_grip_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_priest_grip_SpellScript();
+    }
 };
 
 
@@ -988,6 +1043,7 @@ void AddSC_priest_spell_scripts()
 {
     // Ours
     new spell_pri_shadowfiend_scaling();
+    new spell_priest_grip();
 
     // Theirs
     new spell_pri_circle_of_healing();
