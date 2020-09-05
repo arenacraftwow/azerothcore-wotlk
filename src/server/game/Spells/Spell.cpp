@@ -3565,6 +3565,11 @@ bool Spell::smoke_bomb_check()
             return false;
         }
 
+        if (has_hostile_smoke_bomb(m_caster) && (target->IsHostileTo(m_caster) && !has_friendly_smoke_bomb(target)))
+        {
+            return false;
+        }
+
         // you can't attack an enemy in his smokebomb
         // without being smokebombed yourself
         if ((has_friendly_smoke_bomb(target) && target->IsHostileTo(m_caster)) && !caster_is_in_smoke_bomb)
