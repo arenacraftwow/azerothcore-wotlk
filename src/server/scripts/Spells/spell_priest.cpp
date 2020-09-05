@@ -160,7 +160,7 @@ class spell_priest_grip : public SpellScriptLoader
         void HandleDummy(SpellEffIndex /*effIndex*/)
         {
             float casterZ = GetCaster()->GetPositionZ(); // for Ring of Valor
-            WorldLocation gripPos = *GetExplTargetDest();
+            WorldLocation gripPos = GetCaster()->GetWorldLocation();
             if (Unit* target = GetHitUnit())
                 if (!target->HasAuraType(SPELL_AURA_DEFLECT_SPELLS) || target->HasUnitState(UNIT_STATE_STUNNED)) // Deterrence
                 {
@@ -188,6 +188,34 @@ class spell_priest_grip : public SpellScriptLoader
         return new spell_priest_grip_SpellScript();
     }
 };
+
+//90012
+class spell_evangelism : public SpellScriptLoader
+{
+  public:
+    spell_evangelism() : SpellScriptLoader("spell_evangelism") { }
+
+    class spell_evangelism_SpellScript : public AuraScript
+    {
+        PrepareAuraScript(spell_evangelism_SpellScript);
+
+        bool CheckProc (ProcEventInfo& eventInfo)
+        {
+            return eventInfo.GetHealInfo()->GetSpellInfo()->SpellFamilyFlags[0] & 0x200;
+        }
+
+        void Register()
+        {
+            DoCheckProc += AuraCheckProcFn(spell_evangelism_SpellScript::CheckProc);
+        }
+    };
+
+    AuraScript* GetAuraScript() const
+    {
+        return new spell_evangelism_SpellScript();
+    }
+};
+
 
 
 // Theirs
@@ -1044,6 +1072,7 @@ void AddSC_priest_spell_scripts()
     // Ours
     new spell_pri_shadowfiend_scaling();
     new spell_priest_grip();
+    new spell_evangelism();
 
     // Theirs
     new spell_pri_circle_of_healing();
