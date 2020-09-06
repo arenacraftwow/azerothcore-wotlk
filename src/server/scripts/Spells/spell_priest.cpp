@@ -154,6 +154,9 @@ class spell_priest_grip : public SpellScriptLoader
             if (target->GetTypeId() == TYPEID_PLAYER && caster->GetExactDist(target) < 8.0f) // xinef: should be 8.0f, but we have to add target size (1.5f)
                 return SPELL_FAILED_TOO_CLOSE;
 
+            if (target->HasUnitState(UnitState::UNIT_STATE_STUNNED) || target->HasUnitState(UnitState::UNIT_STATE_ROOT))
+                return SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW;
+
             return SPELL_CAST_OK;
         }
 
@@ -216,7 +219,71 @@ class spell_evangelism : public SpellScriptLoader
     }
 };
 
+// 90009
+class spell_custom_guardian_spirit : public SpellScriptLoader
+{
+  public:
+    spell_custom_guardian_spirit() : SpellScriptLoader("spell_pri_custom_guardian_spirit")
+    {
+    }
 
+    class spell_custom_guardian_spirit_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_custom_guardian_spirit_SpellScript);
+
+        SpellCastResult CheckCast()
+        {
+            if (GetCaster()->HasAura(90011))
+            {
+                return SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW;
+            }
+            return SPELL_CAST_OK;
+        }
+
+        void Register()
+        {
+            OnCheckCast += SpellCheckCastFn(spell_custom_guardian_spirit_SpellScript::CheckCast);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_custom_guardian_spirit_SpellScript();
+    }
+};
+
+// -596
+class spell_prayer_of_healing : public SpellScriptLoader
+{
+  public:
+    spell_prayer_of_healing() : SpellScriptLoader("spell_pri_spell_prayer_of_healing")
+    {
+    }
+
+    class spell_prayer_of_healing_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_prayer_of_healing_SpellScript);
+
+        SpellCastResult CheckCast()
+        {
+            if (GetCaster()->HasAura(90012) && GetCaster()->HasAura(90009))
+            {
+                return SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW;
+            }
+            return SPELL_CAST_OK;
+        }
+
+        void Register()
+        {
+            OnCheckCast += SpellCheckCastFn(spell_prayer_of_healing_SpellScript::CheckCast);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_prayer_of_healing_SpellScript();
+    }
+};
 
 // Theirs
 // -34861 - Circle of Healing
@@ -1073,6 +1140,8 @@ void AddSC_priest_spell_scripts()
     new spell_pri_shadowfiend_scaling();
     new spell_priest_grip();
     new spell_evangelism();
+    new spell_custom_guardian_spirit();
+    new spell_prayer_of_healing();
 
     // Theirs
     new spell_pri_circle_of_healing();
